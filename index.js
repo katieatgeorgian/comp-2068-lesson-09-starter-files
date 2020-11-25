@@ -24,9 +24,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Setup our session
-
+const session = require('express-session');
+//unique to that particular user
+app.use(session({
+  resave: true,
+  saveUninitialized: false,
+  secret: 'any salty secret here'
+}));
 
 // Setting up Passport
+//authentication strategy - using local strategy = username/pswrd
+const passport = require('passport');
+app.use(passport.initialize());//initalize and register as middleware
+app.use(passport.session());
+const User = require('./models/user');
+passport.use(User.createStrategy());//telluse strategy
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 
 // Setting up Passport JWT
@@ -42,4 +56,5 @@ const { handle404s, errorHandler } = require('./errorHandling');
 app.use(handle404s);
 app.use(errorHandler);
 
-app.listen(4000, () => console.log("Always watching... on port 4000"));
+const port = process.env.PORT || 4000;
+app.listen(port, () => console.log(`Always watching... on port ${port}`));
