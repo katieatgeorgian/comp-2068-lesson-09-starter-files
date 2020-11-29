@@ -44,7 +44,25 @@ passport.deserializeUser(User.deserializeUser());
 
 
 // Setting up Passport JWT
+const JWTstrategy = require('passport-jwt').Strategy;
+const ExtractJWT = require('passport-jwt').ExtractJwt;//extract token
 
+//first argument is configuration and second is callback function
+passport.use(new JWTstrategy({
+  secretOrKey: 'any salty secret here',
+  jwtFromRequest: ExtractJWT.fromExtractors([
+    ExtractJWT.fromUrlQueryParameter('secret_token'),//extract from addressbar itself
+    ExtractJWT.fromBodyField('secret_token')//extract from body fields
+  ])
+}, async (token, done) => {
+  console.log(token);
+  try {
+    //if have token return token - look up user
+    return done(null, token.user);
+  } catch (error){
+    done(error);
+  }
+}));
 
 // register the routes
 const routes = require('./routes');
